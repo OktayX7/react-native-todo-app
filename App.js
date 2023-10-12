@@ -23,6 +23,7 @@ const App = () => {
 
   const [text, setText] = useState(initialText);
   const [todos, setTodos] = useState([]);
+  const [edit, setEdit] = useState(false);
 
   const addTodo = () => {
     const newTodo = {
@@ -43,13 +44,35 @@ const App = () => {
     setText(initialText);
   };
 
+  const completedTodo = id => {
+    const todoIndex = todos.findIndex(todo => todo.id === id);
+    const newTodos = [...todos];
+    newTodos[todoIndex].completed = !newTodos[todoIndex].completed;
+    setTodos(newTodos);
+  };
+
+  const deleteTodo = id => {
+    const todoIndex = todos.findIndex(todo => todo.id === id);
+    const newTodos = [...todos];
+    newTodos.splice(todoIndex, 1);
+    setTodos(newTodos);
+  };
+
   return (
     <SafeAreaView style={[generalStyles.flex1, generalStyles.bgWhite]}>
       <Header>My Todo App</Header>
       <Input
         placeholder="Enter Todo"
         hasIcon={true}
-        onIconPress={addTodo}
+        onIconPress={
+          edit
+            ? () => {
+                setEdit(false);
+                setText(initialText);
+                setTodos([...todos, {id: String(new Date().getTime()), text}]);
+              }
+            : addTodo
+        }
         value={text}
         onChangeText={t => setText(t)}
       />
@@ -62,7 +85,16 @@ const App = () => {
         {todos?.length > 0 && (
           <ScrollView style={styles.scrollView}>
             {todos?.map(todo => (
-              <TodoItem key={todo.id} item={todo} />
+              <TodoItem
+                key={todo.id}
+                item={todo}
+                completedOnPress={() => completedTodo(todo.id)}
+                deleteOnPress={() => deleteTodo(todo.id)}
+                editOnPress={() => {
+                  setText(todo.title);
+                  setEdit(true);
+                }}
+              />
             ))}
           </ScrollView>
         )}
@@ -85,8 +117,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    borderWidth: 1,
-    padding: 20,
   },
 });
 

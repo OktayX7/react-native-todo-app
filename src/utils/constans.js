@@ -3,4 +3,7 @@ export const colors = {
   textPrimary: '#393646',
   textSecondary: '#8d8c8c',
   white: '#fff',
+  green: '#79AC78',
+  danger: '#D83F31',
+  blue: '#2E86AB',
 };
