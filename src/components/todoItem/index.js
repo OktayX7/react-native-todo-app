@@ -13,10 +13,15 @@ const TodoItem = ({item, completedOnPress, editOnPress, deleteOnPress}) => {
   return (
     <View style={styles.wrapper}>
       <View style={styles.textWrapper}>
-        <Text style={styles.text}>{item.title}</Text>
-        <Text style={styles.date}>
-          {new Date(item?.date).toLocaleDateString('tr-TR')}
-        </Text>
+        <Text style={styles.text}>{item?.title}</Text>
+        <View style={styles.dateWrapper}>
+          <Text style={styles.date}>
+            {new Date(item?.date).toLocaleDateString('tr-TR')}
+          </Text>
+          {item?.completed && (
+            <Text style={styles.completedText}>(Tamamlandı)</Text>
+          )}
+        </View>
       </View>
       <View style={styles.iconWrapper}>
         <TouchableOpacity onPress={completedOnPress}>
