@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 // Component Imports
 import {Header} from './src/components/header';
@@ -18,6 +18,9 @@ import EditModal from './src/components/edit-modal';
 // Style Imports
 import generalStyles from './src/utils/generalStyles';
 import {colors} from './src/utils/constans';
+
+// Package Imports
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const App = () => {
   const initialText = '';
@@ -40,7 +43,12 @@ const App = () => {
     if (trimText === initialText) {
       Alert.alert('Lütfen bir todo giriniz.');
     } else {
-      setTodos([...todos, newTodo]);
+      AsyncStorage.setItem('@todos', JSON.stringify([...todos, newTodo]))
+        .then(() => {
+          setTodos([...todos, newTodo]);
+          Alert.alert('Todo başarıyla eklendi.');
+        })
+        .catch(err => console.log(err));
     }
 
     setText(initialText);
@@ -64,8 +72,12 @@ const App = () => {
               }
               return todo;
             });
-            setTodos(newTodos);
-            Alert.alert('Todo başarıyla güncellendi.');
+            AsyncStorage.setItem('@todos', JSON.stringify(newTodos))
+              .then(() => {
+                setTodos(newTodos);
+                Alert.alert('Todo başarıyla güncellendi.');
+              })
+              .catch(err => console.log(err));
           },
         },
       ],
@@ -87,8 +99,12 @@ const App = () => {
           text: 'Evet',
           onPress: () => {
             const newTodos = todos.filter(todo => todo.id !== id);
-            setTodos(newTodos);
-            Alert.alert('Todo başarıyla silindi.');
+            AsyncStorage.setItem('@todos', JSON.stringify(newTodos))
+              .then(() => {
+                setTodos(newTodos);
+                Alert.alert('Todo başarıyla silindi.');
+              })
+              .catch(err => console.log(err));
           },
         },
       ],
@@ -117,11 +133,29 @@ const App = () => {
         }
         return todo;
       });
-      setTodos(newTodos);
+      AsyncStorage.setItem('@todos', JSON.stringify(newTodos))
+        .then(() => {
+          setTodos(newTodos);
+        })
+        .catch(err => console.log(err));
+
       Alert.alert('Todo başarıyla güncellendi.');
       closeEditModal();
     }
   };
+
+  useEffect(() => {
+    AsyncStorage.getItem('@todos')
+      .then(res => {
+        console.log(res);
+        if (res !== null) {
+          const parseRes = JSON.parse(res);
+          console.log(parseRes);
+          setTodos(parseRes);
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
 
   return (
     <SafeAreaView style={[generalStyles.flex1, generalStyles.bgWhite]}>
