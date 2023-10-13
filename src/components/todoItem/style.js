@@ -12,15 +12,26 @@ const styles = StyleSheet.create({
   },
   textWrapper: {
     flex: 1,
+    gap: 10,
   },
   text: {
     fontWeight: 'bold',
     color: colors.textPrimary,
     fontSize: 25,
   },
+  dateWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+
   date: {
     color: colors.textPrimary,
-    marginTop: 10,
+  },
+
+  completedText: {
+    color: colors.green,
+    fontWeight: 'bold',
   },
 
   iconWrapper: {

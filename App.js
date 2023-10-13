@@ -13,6 +13,7 @@ import React, {useState} from 'react';
 import {Header} from './src/components/header';
 import Input from './src/components/input';
 import TodoItem from './src/components/todoItem';
+import EditModal from './src/components/edit-modal';
 
 // Style Imports
 import generalStyles from './src/utils/generalStyles';
@@ -23,7 +24,8 @@ const App = () => {
 
   const [text, setText] = useState(initialText);
   const [todos, setTodos] = useState([]);
-  const [edit, setEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [willEditTodo, setWillEditTodo] = useState({});
 
   const addTodo = () => {
     const newTodo = {
@@ -45,17 +47,80 @@ const App = () => {
   };
 
   const completedTodo = id => {
-    const todoIndex = todos.findIndex(todo => todo.id === id);
-    const newTodos = [...todos];
-    newTodos[todoIndex].completed = !newTodos[todoIndex].completed;
-    setTodos(newTodos);
+    Alert.alert(
+      'Emin misiniz?',
+      `${id} id'li todonun completed değeri güncellenecektir.`,
+      [
+        {
+          text: 'İptal',
+          style: 'destructive',
+        },
+        {
+          text: 'Evet',
+          onPress: () => {
+            const newTodos = todos.map(todo => {
+              if (todo.id === id) {
+                todo.completed = !todo.completed;
+              }
+              return todo;
+            });
+            setTodos(newTodos);
+            Alert.alert('Todo başarıyla güncellendi.');
+          },
+        },
+      ],
+      {cancelable: true},
+    );
   };
 
   const deleteTodo = id => {
-    const todoIndex = todos.findIndex(todo => todo.id === id);
-    const newTodos = [...todos];
-    newTodos.splice(todoIndex, 1);
-    setTodos(newTodos);
+    Alert.alert(
+      'Emin misiniz?',
+      `${id} id'li todo silinecektir. Bu işlem geri alınamaz.`,
+      [
+        {
+          text: 'İptal',
+          onPress: () => {},
+          style: 'destructive',
+        },
+        {
+          text: 'Evet',
+          onPress: () => {
+            const newTodos = todos.filter(todo => todo.id !== id);
+            setTodos(newTodos);
+            Alert.alert('Todo başarıyla silindi.');
+          },
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
+  const openEditModal = () => {
+    setIsEdit(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEdit(false);
+  };
+
+  const onConfirmPress = () => {
+    const newTodoTitle = willEditTodo.title.trim();
+
+    if (newTodoTitle === initialText) {
+      Alert.alert('Lütfen bir todo giriniz.');
+      return;
+    } else {
+      const newTodos = todos.map(todo => {
+        if (todo.id === willEditTodo.id) {
+          todo.title = willEditTodo.title;
+        }
+        return todo;
+      });
+      setTodos(newTodos);
+      Alert.alert('Todo başarıyla güncellendi.');
+      closeEditModal();
+    }
   };
 
   return (
@@ -64,15 +129,7 @@ const App = () => {
       <Input
         placeholder="Enter Todo"
         hasIcon={true}
-        onIconPress={
-          edit
-            ? () => {
-                setEdit(false);
-                setText(initialText);
-                setTodos([...todos, {id: String(new Date().getTime()), text}]);
-              }
-            : addTodo
-        }
+        onIconPress={addTodo}
         value={text}
         onChangeText={t => setText(t)}
       />
@@ -91,14 +148,21 @@ const App = () => {
                 completedOnPress={() => completedTodo(todo.id)}
                 deleteOnPress={() => deleteTodo(todo.id)}
                 editOnPress={() => {
-                  setText(todo.title);
-                  setEdit(true);
+                  setWillEditTodo(todo);
+                  openEditModal();
                 }}
               />
             ))}
           </ScrollView>
         )}
       </View>
+      <EditModal
+        willEditTodo={willEditTodo}
+        setWillEditTodo={setWillEditTodo}
+        visible={isEdit}
+        closeModal={closeEditModal}
+        onConfirmPress={onConfirmPress}
+      />
     </SafeAreaView>
   );
 };
